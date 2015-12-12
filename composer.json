@@ -1,0 +1,29 @@
+{
+    "name": "GunnaPHP/SMA",
+    "description": "Script for extracting realtime data from from SMA Sunny Portal",
+    "keywords": [
+        "GunnaPHP",
+        "SMA",
+        "SunnyPortal"
+    ],
+    "homepage": "https://github.com/GunnaPHP/SMA",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Steven Miles",
+            "email": "steve@srmiles.com",
+            "homepage": "https://www.srmiles.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "GunnaPHP/Helpers":"dev-master",
+        "php" : ">=5.5.0",
+        "ext-curl": ">=5.5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "GunnaPHP\\SMA\\": "src"
+        }
+    }
+}
