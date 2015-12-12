@@ -281,7 +281,7 @@ class SunnyPortal
 
   protected function json($url,$json) 
   {
-    if ( ! is_string($json) ) $json = JSON::encode($json);
+    if ( ! is_string($json) ) $json = json_encode($json);
     
     // Configure CURl Request
     curl_setopt($this->ch, CURLOPT_URL, $url); 
@@ -314,7 +314,7 @@ class SunnyPortal
     // Download and decode data  
     $url = $this->domain.'/Plants/GetPlantList';
     $result = $this->xhr($url,['Referer:'.$this->domain.'/Plants']);
-    $data = JSON::decode($result);
+    $data = json_decode($result);
 
     // Process Plant Data into someting useable
     $plants = [];
@@ -350,7 +350,7 @@ class SunnyPortal
     try 
     {
       $result = $this->get($url);      
-      $data = JSON::decode($result);
+      $data = json_decode($result);
       if ( ! empty($data->ErrorMessages) ) {
         throw new \Exception($data->ErrorMessages[0]);
       }
@@ -402,8 +402,8 @@ class SunnyPortal
     $result = $this->json($url,json_encode(['anchorTime'=>$anchorTime,'tabNumber'=>$tabNumber]));
 
     // Parse Response 
-    $data = JSON::decode($result);
-    $data = JSON::decode($data->d);
+    $data = json_decode($result);
+    $data = json_decode($data->d);
     $values =  [];
     foreach ($data AS $value) {
       $values[$value->Key] = $value->Value;
