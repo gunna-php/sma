@@ -1,12 +1,12 @@
 {
-    "name": "GunnaPHP/SMA",
+    "name": "gunna-php/sma",
     "description": "Script for extracting realtime data from from SMA Sunny Portal",
     "keywords": [
         "GunnaPHP",
         "SMA",
         "SunnyPortal"
     ],
-    "homepage": "https://github.com/GunnaPHP/SMA",
+    "homepage": "https://github.com/gunna-php/sma",
     "license": "MIT",
     "authors": [
         {
@@ -17,7 +17,6 @@
         }
     ],
     "require": {
-        "GunnaPHP/Helpers":"dev-master",
         "php" : ">=5.5.0",
         "ext-curl": ">=5.5.0"
     },
