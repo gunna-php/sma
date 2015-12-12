@@ -40,8 +40,10 @@ foreach ($plants AS $plantOID=>$plantName) {
 ```
 ### Select Plant
 Select the plant you want to collect the live data from
+
 ``` PHP
 $poral->setPlant('{SMA Plant OID}');
+
 ```
 
 ### Collect Data
@@ -90,7 +92,7 @@ stdClass Object
 
 ## Credits
 
-- [Steven Miles][https://www.srmiles.com]
+- [Steven Miles](https://www.srmiles.com)
 
 ## License
 
