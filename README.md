@@ -12,7 +12,7 @@ the SMA Sunny Portal Web Interface.
 ### Via Composer
 
 ``` bash
-$ composer require GunnaPHP/SMA
+$ composer require gunna-php/sma
 ```
 ### Manually
  Download the Zip file and extract
@@ -96,10 +96,10 @@ stdClass Object
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/v/GunnaPHP/SMA.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/gunna-php/sma.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/GunnaPHP/SMA.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/gunna-php/sma.svg?style=flat-square
 
-[link-packagist]: https://packagist.org/packages/GunnaPHP/SMA
-[link-downloads]: https://packagist.org/packages/GunnaPHP/SMA
+[link-packagist]: https://packagist.org/packages/gunna-php/sma
+[link-downloads]: https://packagist.org/packages/gunna-php/sma
 [link-author]: https://github.com/srmiles
