@@ -2,6 +2,8 @@
 namespace GunnaPHP\SMA;
 
 use Gunna\Helpers\JSON;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 /**
  * SMA Sunny Port Data Extractor
@@ -86,6 +88,11 @@ class SunnyPortal
     protected $ch;
 
     /**
+     * @var Logger
+     */
+    protected $logger;
+
+    /**
      * Class Constructor
      *
      * @param array $cfg Configration params for connecting to sunny portal
@@ -104,8 +111,14 @@ class SunnyPortal
                 }
             }
         }
+
+        $this->logger = new Logger('SunnyPortalLog');
+        $this->logger->pushHandler(new StreamHandler('SunnyPortal.log', Logger::DEBUG));
+
         if (empty($this->username) || empty($this->password)) return false;
         $this->cookieFilePath = sys_get_temp_dir() . $this->cookieFilePath;
+
+        $this->logger->debug('Saving cookies into ' . $this->cookieFilePath);
 
         $this->buildCURL();
         $this->initSession();
@@ -133,6 +146,7 @@ class SunnyPortal
         // If we have a session cookie that is less that 2hrs old assume we are logged in
         if (is_file($this->cookieFilePath) && filectime($this->cookieFilePath) > strtotime('-2 hour')) {
             $this->isLoggedin = true;
+            $this->logger->info('Session seems still valid. Skipping login process.');
             return;
         }
 
@@ -156,6 +170,8 @@ class SunnyPortal
 
     public function login()
     {
+        $this->logger->info('Starting login process');
+
         $result = $this->post(
             $this->domain . '/Templates/Start.aspx?logout=true',
             [
@@ -168,6 +184,8 @@ class SunnyPortal
         $this->isLoggedin = preg_match('/PV System List/', $result) ? true : false;
 
         if (!$this->isLoggedin) throw new \Exception('Error Logging into Sunny Portal');
+
+        $this->logger->info('Login Successful');
     }
 
     public function relogin()
@@ -181,19 +199,20 @@ class SunnyPortal
     public function logout()
     {
         if ($this->isLoggedin == false) return;
-
         $this->get($this->domain . '/Templates/Logout.aspx');
-
         curl_close($this->ch);
-
         $this->deleteCookies();
-
     }
-
-
-    public function deleteCookies()
+    
+    public function deleteCookies(): void
     {
-        if (is_file($this->cookieFilePath)) unlink($this->cookieFilePath);
+        if (is_file($this->cookieFilePath)) {
+            $success = unlink($this->cookieFilePath);
+
+            if (!$success) {
+                throw new \Exception('Deletion of the cookie file at ' . $this->cookieFilePath . ' was not possible!');
+            }
+        }
     }
 
     protected function get($url, $headers = null)
@@ -348,8 +367,8 @@ class SunnyPortal
             }
 
             return $data;
-
         } catch (\Exception $e) {
+            $this->logger->warning('Error while retreiving live data, trying to re-login: ' . $e->getMessage());
             $this->relogin();
             return $this->liveData();
         }
