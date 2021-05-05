@@ -20,25 +20,25 @@ use Gunna\Helpers\JSON;
 
 class SunnyPortal
 {
-    
+
 /**
  * Sunny Portal Domain
- * @var string 
- */  
-    
+ * @var string
+ */
+
   protected $domain =  'https://www.sunnyportal.com';
 
 /**
  * Cookie Storage File Name
- * @var string 
- */  
+ * @var string
+ */
 
   protected $cookieFilePath = 'sunnyportal.cookies';
 
 /**
  * Currently selected plantID
- * @var string 
- */  
+ * @var string
+ */
 
   protected $currentPlantID = '';
 
@@ -48,30 +48,30 @@ class SunnyPortal
 
 /**
  * Login Username
- * @var string 
- */  
+ * @var string
+ */
 
   protected $username = '';
 
 /**
  * Login Password
- * @var string 
- */  
- 
+ * @var string
+ */
+
   protected $password = '';
 
 /**
  * Currently Logged into Portal
  * @var bool
- */  
- 
+ */
+
   public    $isLoggedin = false;
 
 
 /**
  * Post Params required by sunnyportal
  * @var array
- */  
+ */
 
   protected $postParams = [
     '__EVENTTARGET'                            => '',
@@ -84,16 +84,16 @@ class SunnyPortal
 /**
  * CURL Connection Handle
  * @var resource
- */ 
+ */
   protected $ch;
 
 /**
- * Class Constructor 
+ * Class Constructor
  *
  * @param array $cfg Configration params for connecting to sunny portal
  */
 
-  public function __construct($cfg=null) 
+  public function __construct($cfg=null)
   {
     if (is_object($cfg) || is_array($cfg)) {
       foreach ($cfg AS $name=>$value) {
@@ -108,11 +108,11 @@ class SunnyPortal
     }
     if (empty($this->username) || empty($this->password)) return false;
     $this->cookieFilePath = sys_get_temp_dir().$this->cookieFilePath;
-    
+
     $this->buildCURL();
     $this->initSession();
   }
-  
+
   protected function buildCURL() {
     $this->ch = curl_init();
     // basic curl options for all requests
@@ -121,34 +121,34 @@ class SunnyPortal
     curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, 0);
     curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($this->ch, CURLOPT_BINARYTRANSFER,TRUE);
-    curl_setopt($this->ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"); 
-    curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1); 
-    curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, 1); 
-    curl_setopt($this->ch, CURLOPT_COOKIEFILE, $this->cookieFilePath); 
-    curl_setopt($this->ch, CURLOPT_COOKIEJAR,  $this->cookieFilePath); 
+    curl_setopt($this->ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:66.0) Gecko/20100101 Firefox/66.0");
+    curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($this->ch, CURLOPT_COOKIEFILE, $this->cookieFilePath);
+    curl_setopt($this->ch, CURLOPT_COOKIEJAR,  $this->cookieFilePath);
   }
-  
-  protected function initSession() 
+
+  protected function initSession()
   {
 
     // If we have a session cookie that is less that 2hrs old assume we are logged in
-    if (is_file($this->cookieFilePath) && filectime($this->cookieFilePath) > strtotime('-2 hour')) 
+    if (is_file($this->cookieFilePath) && filectime($this->cookieFilePath) > strtotime('-2 hour'))
     {
       $this->isLoggedin = true;
       return;
     }
-    
+
     // Clear previous session cookie
     if (is_file($this->cookieFilePath)) unlink($this->cookieFilePath);
 
-    
+
     $result = $this->get($this->domain.'/Plants');
-    
+
     // Check if it returned the PV System List
     $this->isLoggedin = preg_match('/PV System List/',$result,$matches)?true:false;
-    
+
     if (!$this->isLoggedin) $this->login();
-    
+
     preg_match_all('<input type="hidden" name="([^"]+)".*value="([^"]+)">',$result,$matches);
     foreach ($matches[1] AS $i=>$field)
     {
@@ -156,10 +156,10 @@ class SunnyPortal
     }
 
   }
-  
-  
-  
-  public function login() 
+
+
+
+  public function login()
   {
     $result = $this->post(
       $this->domain.'/Templates/Start.aspx?logout=true',
@@ -169,12 +169,12 @@ class SunnyPortal
         'ctl00$ContentPlaceHolder1$Logincontrol1$LoginBtn'         => 'Login'
       ]
     );
-    
+
     $this->isLoggedin = preg_match('/PV System List/',$result)?true:false;
-    
+
     if (!$this->isLoggedin) throw new \Exception('Error Logging into Sunny Portal');
   }
-  
+
   public function relogin()
   {
     $this->logout();
@@ -182,26 +182,26 @@ class SunnyPortal
     $this->buildCURL();
     $this->initSession();
   }
-  public function logout() 
+  public function logout()
   {
     if ($this->isLoggedin == false) return;
-  
+
     $this->get($this->domain.'/Templates/Logout.aspx');
-  
+
     curl_close($this->ch);
-  
+
     $this->deleteCookies();
-  
+
   }
-  
-  
+
+
   public function deleteCookies()
   {
     if (is_file($this->cookieFilePath)) unlink($this->cookieFilePath);
   }
-  
-  protected function get($url,$headers=null) 
-  { 
+
+  protected function get($url,$headers=null)
+  {
     curl_setopt($this->ch, CURLOPT_URL,$url);
     curl_setopt($this->ch, CURLOPT_HTTPGET, TRUE);
     curl_setopt($this->ch, CURLOPT_HEADER, 0);
@@ -214,14 +214,14 @@ class SunnyPortal
       'Origin:'.$this->domain,
       'Host:www.sunnyportal.com'
     ];
-    
+
     if (is_array($headers)) $curlHeaders = array_merge($curlHeaders,$headers);
     curl_setopt($this->ch, CURLOPT_HTTPHEADER,$curlHeaders);
-    $content = curl_exec($this->ch); 
+    $content = curl_exec($this->ch);
     return $content;
   }
-  
-  protected function xhr($url,$headers=null) 
+
+  protected function xhr($url,$headers=null)
   {
     curl_setopt($this->ch, CURLOPT_HTTPGET, TRUE);
     curl_setopt($this->ch, CURLOPT_URL,$url);
@@ -239,34 +239,34 @@ class SunnyPortal
       ],$headers)
     );
 
-    $content = curl_exec($this->ch); 
+    $content = curl_exec($this->ch);
     return $content;
   }
 
-  
-  protected function post($url,$fields) 
+
+  protected function post($url,$fields)
   {
     // Configure CURl Request
-    curl_setopt($this->ch, CURLOPT_URL, $url); 
-    curl_setopt($this->ch, CURLOPT_POST, 1); 
+    curl_setopt($this->ch, CURLOPT_URL, $url);
+    curl_setopt($this->ch, CURLOPT_POST, 1);
     curl_setopt($this->ch, CURLOPT_HTTPHEADER,[
       'Origin: '.$this->domain,
       'Upgrade-Insecure-Requests: 1'
     ]);
     if (is_array($fields))
     {
-      curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query(array_merge($this->postParams,$fields))); 
-    } 
-    else 
+      curl_setopt($this->ch, CURLOPT_POSTFIELDS, http_build_query(array_merge($this->postParams,$fields)));
+    }
+    else
     {
-      curl_setopt($this->ch, CURLOPT_POSTFIELDS, $fields);   
+      curl_setopt($this->ch, CURLOPT_POSTFIELDS, $fields);
     }
     // Request Data
-    $result = curl_exec($this->ch);  
+    $result = curl_exec($this->ch);
 
-    curl_setopt($this->ch, CURLOPT_URL, ''); 
-    curl_setopt($this->ch, CURLOPT_POST, false); 
-    curl_setopt($this->ch, CURLOPT_POSTFIELDS,null); 
+    curl_setopt($this->ch, CURLOPT_URL, '');
+    curl_setopt($this->ch, CURLOPT_POST, false);
+    curl_setopt($this->ch, CURLOPT_POSTFIELDS,null);
 
     return $result;
   }
@@ -277,28 +277,28 @@ class SunnyPortal
  * @param string $url Request URI
  * @param mixed $json JSON Payload
  * @return string Result from request
- */ 
+ */
 
-  protected function json($url,$json) 
+  protected function json($url,$json)
   {
     if ( ! is_string($json) ) $json = json_encode($json);
-    
+
     // Configure CURl Request
-    curl_setopt($this->ch, CURLOPT_URL, $url); 
-    curl_setopt($this->ch, CURLOPT_POST, 1); 
+    curl_setopt($this->ch, CURLOPT_URL, $url);
+    curl_setopt($this->ch, CURLOPT_POST, 1);
     curl_setopt($this->ch, CURLOPT_HTTPHEADER,[
       'Content-Type: application/json',
       'Content-Length: ' . strlen($json),
       'Origin: '.$this->domain,
       'Upgrade-Insecure-Requests: 1'
     ]);
-    curl_setopt($this->ch, CURLOPT_POSTFIELDS, $json);   
+    curl_setopt($this->ch, CURLOPT_POSTFIELDS, $json);
     // Request Data
-    $result = curl_exec($this->ch);  
+    $result = curl_exec($this->ch);
 
-    curl_setopt($this->ch, CURLOPT_URL, ''); 
-    curl_setopt($this->ch, CURLOPT_POST, false); 
-    curl_setopt($this->ch, CURLOPT_POSTFIELDS,null); 
+    curl_setopt($this->ch, CURLOPT_URL, '');
+    curl_setopt($this->ch, CURLOPT_POST, false);
+    curl_setopt($this->ch, CURLOPT_POSTFIELDS,null);
 
     return $result;
   }
@@ -307,11 +307,11 @@ class SunnyPortal
 /**
  * Get List of Plants Associated with this login
  * @return array [ plantOID => plantName ]
- */  
-  
+ */
+
   public function getPlantList()
   {
-    // Download and decode data  
+    // Download and decode data
     $url = $this->domain.'/Plants/GetPlantList';
     $result = $this->xhr($url,['Referer:'.$this->domain.'/Plants']);
     $data = json_decode($result);
@@ -319,11 +319,11 @@ class SunnyPortal
     // Process Plant Data into someting useable
     $plants = [];
     foreach ($data->aaData AS $plant) {
-        
+
       $plants[$plant->PlantOid] = $plant->PlantName;
 
     }
-    
+
     return $plants;
   }
 
@@ -332,30 +332,30 @@ class SunnyPortal
  *
  * @param string $plantID PlantOID from plant list
  * @return void
- */  
+ */
 
   public function setPlant($plantID)
   {
     $this->get($this->domain.'/RedirectToPlant/'.$plantID);
   }
-  
+
 /**
  * Get Current Reading Values from Sunnry Portal
- * @return object 
- */   
+ * @return object
+ */
   public function liveData()
   {
     $url = $this->domain.'/homemanager?t='.(time()*1000);
 
-    try 
+    try
     {
-      $result = $this->get($url);      
+      $result = $this->get($url);
       $data = json_decode($result);
       if ( ! empty($data->ErrorMessages) ) {
         throw new \Exception($data->ErrorMessages[0]);
       }
       return $data;
-      
+
     } catch (\Exception $e)
     {
       $this->relogin();
@@ -365,10 +365,10 @@ class SunnyPortal
 
 
 /**
- * Trigger Sunny Portal to request updated data from the Home Energy Monitor 
+ * Trigger Sunny Portal to request updated data from the Home Energy Monitor
  * @return void
- */  
-  
+ */
+
   public function triggerUpdate()
   {
     // Trigger Update of Live Data
@@ -391,17 +391,17 @@ class SunnyPortal
       case 'current': $tabNumber = 0; break;
       case 'day':     $tabNumber = 1; break;
       case 'month':   $tabNumber = 2; break;
-      case 'total':   $tabNumber = 3; break;    
+      case 'total':   $tabNumber = 3; break;
     }
 
     // Trigger Update of Live Data
     $this->triggerUpdate();
-    
+
     // Get Curent Values
     $url = $this->domain.'/FixedPages/HoManEnergyRedesign.aspx/GetLegendWithValues';
     $result = $this->json($url,json_encode(['anchorTime'=>$anchorTime,'tabNumber'=>$tabNumber]));
 
-    // Parse Response 
+    // Parse Response
     $data = json_decode($result);
     $data = json_decode($data->d);
     $values =  [];
@@ -413,10 +413,10 @@ class SunnyPortal
 
 
 
-  
+
   public function energyBalanceHistory()
   {
-    
+
     $this->post($this->domain.'/FixedPages/HoManLive.aspx',[
       '__EVENTTARGET' => 'ctl00$NavigationLeftMenuControl$1_3',
       '__EVENTARGUMENT' => '',
@@ -445,9 +445,9 @@ class SunnyPortal
       'ctl00$ContentPlaceHolder1$FixPageConfiguration1$NameSenderTextBox' => '',
       'ctl00$ContentPlaceHolder1$FixPageConfiguration1$MessageTextBox' => ''
     ]);
-    
-    
-    
+
+
+
     //$url = $this->domain.'/Templates/DownloadDiagram.aspx?down=homanEnergyRedesign&chartId=mainChart';
     $url = 'http://www.sunnyportal.com/Templates/DownloadDiagram.aspx?down=homanEnergyRedesign&chartId=mainChart';
   //  $url = $this->domain.'/Templates/DownloadDiagram.aspx?down=homanEnergyRedesign&chartId=mainChart';
@@ -455,5 +455,5 @@ class SunnyPortal
     $result = $this->get($url);
     print_r($result);
   }
- 
+
 }
