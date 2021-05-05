@@ -119,7 +119,7 @@ class SunnyPortal
         curl_setopt($this->ch, CURLOPT_HEADER, 0);
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($this->ch, CURLOPT_BINARYTRANSFER, TRUE);
+        curl_setopt($this->ch, CURLOPT_BINARYTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:66.0) Gecko/20100101 Firefox/66.0");
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -138,7 +138,6 @@ class SunnyPortal
 
         // Clear previous session cookie
         if (is_file($this->cookieFilePath)) unlink($this->cookieFilePath);
-
 
         $result = $this->get($this->domain . '/Plants');
 
@@ -339,7 +338,7 @@ class SunnyPortal
      */
     public function liveData()
     {
-        $url = $this->domain . '/homemanager?t=' . (time() * 1000);
+        $url = $this->domain . '/homemanager?t=' . time();
 
         try {
             $result = $this->get($url);
@@ -347,6 +346,7 @@ class SunnyPortal
             if (!empty($data->ErrorMessages)) {
                 throw new \Exception($data->ErrorMessages[0]);
             }
+
             return $data;
 
         } catch (\Exception $e) {
